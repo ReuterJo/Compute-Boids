@@ -1,0 +1,4 @@
+
+0(95) : error C1503: undefined variable "tp"
+0(97) : error C1503: undefined variable "tp"
+
