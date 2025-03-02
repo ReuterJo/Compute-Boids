@@ -1,6 +1,6 @@
-proj7b:		proj7b.cpp
-		g++   -o proj7b   proj7b.cpp  -lGL -lGLU -lglut -lGLEW  -lm
+boid:		boid.cpp
+		g++   -o boid   boid.cpp  -lGL -lGLU -lglut -lGLEW  -lm
 
 
 save:
-		cp proj7b.cpp proj7b.save.cpp
+		cp boid.cpp boid.save.cpp

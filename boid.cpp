@@ -61,7 +61,7 @@
 
 // title of these windows:
 
-const char *WINDOWTITLE = "CS457 Project 7B -- Jonathan Reuter";
+const char *WINDOWTITLE = "CS457 Final Project -- Boids -- Jonathan Reuter";
 const char *GLUITITLE   = "User Interface Window";
 
 // what the glui package defines as true and false:
