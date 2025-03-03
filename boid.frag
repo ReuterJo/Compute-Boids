@@ -1,4 +1,4 @@
-#version 330 compatibility
+#version 430 compatibility
 
 in vec4         vColor;  // color vector
 

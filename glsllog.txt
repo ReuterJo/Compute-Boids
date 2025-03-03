@@ -1,3 +1,4 @@
 
-0(73) : error C7011: implicit cast from "int" to "bool"
+0(26) : error C7506: OpenGL does not define the global function atan2
+0(32) : error C7011: implicit cast from "vec4" to "vec2"
 
