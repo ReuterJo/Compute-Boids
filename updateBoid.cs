@@ -25,8 +25,6 @@ uniform float   uRule1Scale;
 uniform float   uRule2Scale;
 uniform float   uRule3Scale;
 
-uniform float   uTime;
-
 float
 distance( vec2 pos1, vec2 pos2 )
 {
@@ -115,7 +113,7 @@ main( )
     }
     if( vPos.x > 1.0 )
     {
-        vPos.x = 1.0;
+        vPos.x = -1.0;
     }
     if( vPos.y < -1.0 )
     {

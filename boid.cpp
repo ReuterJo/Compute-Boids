@@ -304,15 +304,15 @@ ReadTexture3D( char *filename, int *width, int *height, int *depth)
 #define WORK_GROUP_SIZE		128
 
 // Simulation constant global variables
-const float XMAX = 0.8;
-const float XMIN = -0.8;
-const float YMAX = 0.8;
-const float YMIN = -0.8;
+const float XMAX = 1.0;
+const float XMIN = -1.0;
+const float YMAX = 1.0;
+const float YMIN = -1.0;
 
 const float VXMAX =  0.1;
-const float VXMIN =  0.05;
+const float VXMIN =  0.025;
 const float VYMAX =  0.1;
-const float VYMIN =  0.05;
+const float VYMIN =  0.025;
 
 const float deltaT = 		0.04;
 const float rule1Distance = 0.1;
@@ -499,7 +499,6 @@ Display( )
 	glBindBufferBase( GL_SHADER_STORAGE_BUFFER, 4, posSSbo );
 	glBindBufferBase( GL_SHADER_STORAGE_BUFFER, 5, velSSbo );
 	UpdateBoid.Use( );
-	UpdateBoid.SetUniformVariable( "uTime", Time );
 	UpdateBoid.DispatchCompute( NUM_BOIDS / WORK_GROUP_SIZE, 1, 1 );
 	UpdateBoid.UnUse( );
 
