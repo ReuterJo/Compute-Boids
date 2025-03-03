@@ -286,18 +286,77 @@ ReadTexture3D( char *filename, int *width, int *height, int *depth)
 
 //#include "setmaterial.cpp"
 //#include "setlight.cpp"
-#include "osusphere.cpp"
+//#include "osusphere.cpp"
 //#include "osucone.cpp"
 //#include "osutorus.cpp"
-#include "bmptotexture.cpp"
-#include "loadobjfile.cpp"
-#include "keytime.cpp"
+//#include "bmptotexture.cpp"
+//#include "loadobjfile.cpp"
+//#include "keytime.cpp"
+
+// Define what type of shaders we are using
+#define COMPUTE
+
 #include "glslprogram.cpp"
 
-GLuint DinoList;
-GLSLProgram Twist;
-Keytimes uTwistX, uTwistY, uTwistZ;
-float NowTwistX, NowTwistY, NowTwistZ;
+// Simulation directives
+
+#define NUM_BOIDS			256
+#define WORK_GROUP_SIZE		128
+
+// Simulation constant global variables
+const float XMAX = 0.8;
+const float XMIN = -0.8;
+const float YMAX = 0.8;
+const float YMIN = -0.8;
+
+const float VXMAX =  0.1;
+const float VXMIN =  0.05;
+const float VYMAX =  0.1;
+const float VYMIN =  0.05;
+
+const float deltaT = 		0.04;
+const float rule1Distance = 0.1;
+const float rule2Distance = 0.025;
+const float rule3Distance = 0.025;
+const float rule1Scale =	0.02;
+const float rule2Scale = 	0.05;
+const float rule3Scale = 	0.005;
+
+// Simulation non-constant global variables
+
+GLSLProgram Boid;
+GLSLProgram UpdateBoid;
+GLuint posSSbo;
+GLuint velSSbo;
+
+// Utility function for setting up particle system
+
+// utility function for setting up particle system
+float 
+Ranf( float low, float high )
+{
+	float r = (float) rand();
+	float t = r / (float) RAND_MAX;
+
+	return low + t * ( high - low );
+}
+
+// Particle system structures
+
+struct pos
+{
+	float x, y, z, w;	// positions
+};
+
+struct vel
+{
+	float vx, vy, vz, vw;	// velocities
+};
+
+struct color
+{
+	float r, g, b, a;	// colors
+};
 
 // main program:
 
@@ -436,18 +495,27 @@ Display( )
 
 	glEnable( GL_NORMALIZE );
 
-	// <<< insert custom code here >>>
+	// Simulation boids in flight
+	glBindBufferBase( GL_SHADER_STORAGE_BUFFER, 4, posSSbo );
+	glBindBufferBase( GL_SHADER_STORAGE_BUFFER, 5, velSSbo );
+	UpdateBoid.Use( );
+	UpdateBoid.SetUniformVariable( "uTime", Time );
+	UpdateBoid.DispatchCompute( NUM_BOIDS / WORK_GROUP_SIZE, 1, 1 );
+	UpdateBoid.UnUse( );
 
-	NowTwistX = uTwistX.GetValue( Time );
-	NowTwistY = uTwistY.GetValue( Time );
-	NowTwistZ = uTwistZ.GetValue( Time );
+	// Draw boid as points
+	Boid.Use( );
+	glBindBuffer( GL_ARRAY_BUFFER, posSSbo );
+	glVertexPointer( 4, GL_FLOAT, 0, (void *)0 );
+	glEnableClientState( GL_VERTEX_ARRAY );
 
-	Twist.Use();
-	Twist.SetUniformVariable( "uTwistX", NowTwistX );
-	Twist.SetUniformVariable( "uTwistY", NowTwistY );
-	Twist.SetUniformVariable( "uTwistZ", NowTwistZ );
-	glCallList( DinoList );
-	Twist.UnUse();
+	glPointSize( 2. );
+	glDrawArrays( GL_POINTS, 0, NUM_BOIDS );
+
+	glPointSize( 1. );
+	glDisableClientState( GL_VERTEX_ARRAY );
+	glBindBuffer( GL_ARRAY_BUFFER, 0 );
+	Boid.UnUse( );
 
 	// draw some gratuitous text that just rotates on top of the scene:
 	// i commented out the actual text-drawing calls -- put them back in if you have a use for them
@@ -742,52 +810,75 @@ InitGraphics( )
 	fprintf( stderr, "Status: Using GLEW %s\n", glewGetString(GLEW_VERSION));
 //#endif
 
-	// all other setups go here, such as GLSLProgram and KeyTime setups:
+	// Set up position shader storage buffer for simulation
 
-	// setup the texture shader
-	Twist.Init( );
-	bool valid = Twist.Create( (char *)"twist.vert", (char *)"twist.frag" );
-	if( !valid )
-		fprintf( stderr, "Could not create the Twist shader!\n" );
+	glGenBuffers( 1, &posSSbo );
+	glBindBuffer( GL_SHADER_STORAGE_BUFFER, posSSbo );
+	glBufferData( GL_SHADER_STORAGE_BUFFER, NUM_BOIDS * sizeof(struct pos), NULL, GL_STATIC_DRAW );
+
+	GLint bufMask = GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT;	// the invalidate makes a big difference re-writing
+
+	struct pos *points = (struct pos *) glMapBufferRange( GL_SHADER_STORAGE_BUFFER, 0, NUM_BOIDS * sizeof(struct pos), bufMask );
+	for ( int i = 0; i < NUM_BOIDS; i++ )
+	{
+		
+		points[i].x = Ranf( XMIN, XMAX );
+		points[i].y = Ranf( YMIN, YMAX );; 
+		points[i].z = 0.;
+		points[i].w = 1.;
+	}
+	glUnmapBuffer( GL_SHADER_STORAGE_BUFFER );
+
+	// Set up velocity shader storage buffer for simulation
+
+	glGenBuffers( 1, &velSSbo );
+	glBindBuffer( GL_SHADER_STORAGE_BUFFER, velSSbo );
+	glBufferData( GL_SHADER_STORAGE_BUFFER, NUM_BOIDS * sizeof(struct vel), NULL, GL_STATIC_DRAW );
+
+	struct vel *velocities = (struct vel *) glMapBufferRange( GL_SHADER_STORAGE_BUFFER, 0, NUM_BOIDS * sizeof(struct vel), bufMask );
+	for ( int i = 0; i < NUM_BOIDS; i++ )
+	{
+		
+		velocities[i].vx = Ranf( VXMIN, VXMAX );
+		velocities[i].vy = Ranf( VYMIN, VYMAX );; 
+		velocities[i].vz = 0.;
+		velocities[i].vw = 1.;
+	}
+	glUnmapBuffer( GL_SHADER_STORAGE_BUFFER );
+
+	// Set up GLSLProgram for rendering 
+	Boid.Init( );
+	bool valid = Boid.Create( "boid.vert", "boid.frag" );
+	if ( !valid )
+	{
+		fprintf( stderr, "Yuch! The Boid shader did not compile.\n" );
+	}
 	else
-		fprintf( stderr, "Twist shader created!\n" );
+	{
+		fprintf( stderr, "Woo-Hoo! The Boid shader compiled.\n" ); 
+	}
 
-	Twist.Use();
-	Twist.SetUniformVariable( "uKa", 0.05 );
-	Twist.SetUniformVariable( "uKd", 0.6 );
-	Twist.SetUniformVariable( "uKs", 0.5 );
-	Twist.SetUniformVariable( "uShininess", 10. );
-	Twist.SetUniformVariable("uLightX", 0.);
-	Twist.SetUniformVariable("uLightY", 20.);
-	Twist.SetUniformVariable("uLightZ", 20.);
-	Twist.SetUniformVariable("uRedDepth", 2.5);
-	Twist.SetUniformVariable("uBlueDepth", 3.5);
-	Twist.SetUniformVariable("uP", 0.5);
-	Twist.SetUniformVariable("uWidth", 0.1);
-	Twist.SetUniformVariable("uTol", 0.01);
-	Twist.UnUse();
-
-	// Setup keytime values
-	uTwistX.Init( );
-	uTwistX.AddTimeValue( 0.0, 0.0 );
-	uTwistX.AddTimeValue( 0.15, 2.*M_PI / 15.0 );
-	uTwistX.AddTimeValue( 0.3, 0.0 );
-	uTwistX.AddTimeValue( 1.0, 0.0 );
-	
-	uTwistY.Init( );
-	uTwistY.AddTimeValue( 0.0, 0.0 );
-	uTwistY.AddTimeValue( 0.3, 0.0 );
-	uTwistY.AddTimeValue( 0.45, 2.*M_PI / 15.0 );
-	uTwistY.AddTimeValue( 0.6, 0.0 );
-	uTwistY.AddTimeValue( 1.0, 0.0 );
-
-	uTwistZ.Init( );
-	uTwistZ.AddTimeValue( 0.0, 0.0 );
-	uTwistZ.AddTimeValue( 0.6, 0.0 );
-	uTwistZ.AddTimeValue( 0.75, 2.*M_PI / 15.0 );
-	uTwistZ.AddTimeValue( 0.9, 0.0 );
-	uTwistZ.AddTimeValue( 1.0, 0.0 );
-
+	// Setup GLSLProgram for simulation compute
+	UpdateBoid.Init( );
+	valid = UpdateBoid.Create( "updateBoid.cs" );
+	if ( !valid )
+	{
+		fprintf( stderr, "Yuch! The Update Boid shader did not compile.\n" );
+	}
+	else
+	{
+		fprintf( stderr, "Woo-Hoo! The Update Boid shader compiled.\n" ); 
+	}
+	UpdateBoid.Use( );
+	UpdateBoid.SetUniformVariable( "uNumBoids", NUM_BOIDS );
+	UpdateBoid.SetUniformVariable( "uDeltaT", deltaT );
+	UpdateBoid.SetUniformVariable( "uRule1Distance", rule1Distance );
+	UpdateBoid.SetUniformVariable( "uRule2Distance", rule2Distance );
+	UpdateBoid.SetUniformVariable( "uRule3Distance", rule3Distance );
+	UpdateBoid.SetUniformVariable( "uRule1Scale", rule1Scale );
+	UpdateBoid.SetUniformVariable( "uRule2Scale", rule2Scale );
+	UpdateBoid.SetUniformVariable( "uRule3Scale", rule3Scale );
+	UpdateBoid.UnUse( );
 }
 
 // initialize the display lists that will not change:
@@ -802,15 +893,6 @@ InitLists( )
 		fprintf(stderr, "Starting InitLists.\n");
 
 	glutSetWindow( MainWindow );
-
-	// create snake list
-	DinoList = glGenLists( 1 );
-	glNewList( DinoList, GL_COMPILE );
-		glPushMatrix( );
-			glScalef( 0.25, 0.25, 0.25 );
-			LoadObjFile( "dino.obj" );
-		glPopMatrix( );
-	glEndList( );
 
 	// create the axes:
 	AxesList = glGenLists( 1 );
