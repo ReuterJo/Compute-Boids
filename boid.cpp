@@ -310,9 +310,9 @@ const float YMAX = 1.0;
 const float YMIN = -1.0;
 
 const float VXMAX =  0.1;
-const float VXMIN =  0.025;
+const float VXMIN =  -0.1;
 const float VYMAX =  0.1;
-const float VYMIN =  0.025;
+const float VYMIN =  -0.1;
 
 const float deltaT = 		0.04;
 const float rule1Distance = 0.1;
@@ -495,9 +495,11 @@ Display( )
 
 	glEnable( GL_NORMALIZE );
 
-	// Simulation boids in flight
+	// Bind shader storage buffers
 	glBindBufferBase( GL_SHADER_STORAGE_BUFFER, 4, posSSbo );
 	glBindBufferBase( GL_SHADER_STORAGE_BUFFER, 5, velSSbo );
+
+	// Simulation boids in flight
 	UpdateBoid.Use( );
 	UpdateBoid.DispatchCompute( NUM_BOIDS / WORK_GROUP_SIZE, 1, 1 );
 	UpdateBoid.UnUse( );
@@ -509,12 +511,16 @@ Display( )
 	glEnableClientState( GL_VERTEX_ARRAY );
 
 	glPointSize( 2. );
-	glDrawArrays( GL_POINTS, 0, NUM_BOIDS );
+	glDrawArrays( GL_POINTS, 0, NUM_BOIDS);
 
 	glPointSize( 1. );
 	glDisableClientState( GL_VERTEX_ARRAY );
 	glBindBuffer( GL_ARRAY_BUFFER, 0 );
 	Boid.UnUse( );
+
+	// Unbind shader storage buffers
+	glBindBufferBase( GL_SHADER_STORAGE_BUFFER, 4, 0 );
+	glBindBufferBase( GL_SHADER_STORAGE_BUFFER, 5, 0 );
 
 	// draw some gratuitous text that just rotates on top of the scene:
 	// i commented out the actual text-drawing calls -- put them back in if you have a use for them
