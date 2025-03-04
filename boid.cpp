@@ -301,7 +301,7 @@ ReadTexture3D( char *filename, int *width, int *height, int *depth)
 
 // Simulation directives
 
-#define NUM_BOIDS			256
+#define NUM_BOIDS			512
 #define WORK_GROUP_SIZE		128
 
 // Simulation constant global variables
