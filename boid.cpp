@@ -315,6 +315,8 @@ const float VXMIN =  -0.1;
 const float VYMAX =  0.1;
 const float VYMIN =  -0.1;
 
+const float boidSize = 		0.02;
+
 const float deltaT = 		0.04;
 const float rule1Distance = 0.1;
 const float rule2Distance = 0.025;
@@ -865,6 +867,7 @@ InitGraphics( )
 		fprintf( stderr, "Woo-Hoo! The Boid shader compiled.\n" ); 
 	}
 	Boid.Use( );
+	Boid.SetUniformVariable( "uBoidSize", boidSize );
 	Boid.SetUniformVariable( "uOuter0", 10 );
 	Boid.SetUniformVariable( "uOuter1", 10 );
 	Boid.SetUniformVariable( "uOuter2", 10 );
