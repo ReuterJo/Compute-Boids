@@ -295,6 +295,7 @@ ReadTexture3D( char *filename, int *width, int *height, int *depth)
 
 // Define what type of shaders we are using
 #define COMPUTE
+#define TESSELLATION
 
 #include "glslprogram.cpp"
 
@@ -506,14 +507,15 @@ Display( )
 
 	// Draw boid as points
 	Boid.Use( );
+	glPatchParameteri( GL_PATCH_VERTICES, 1 );
 	glBindBuffer( GL_ARRAY_BUFFER, posSSbo );
 	glVertexPointer( 4, GL_FLOAT, 0, (void *)0 );
 	glEnableClientState( GL_VERTEX_ARRAY );
 
-	glPointSize( 2. );
-	glDrawArrays( GL_POINTS, 0, NUM_BOIDS);
+	//glPointSize( 2. );
+	glDrawArrays( GL_PATCHES, 0, NUM_BOIDS);
 
-	glPointSize( 1. );
+	//glPointSize( 1. );
 	glDisableClientState( GL_VERTEX_ARRAY );
 	glBindBuffer( GL_ARRAY_BUFFER, 0 );
 	Boid.UnUse( );
@@ -853,7 +855,7 @@ InitGraphics( )
 
 	// Set up GLSLProgram for rendering 
 	Boid.Init( );
-	bool valid = Boid.Create( "boid.vert", "boid.frag" );
+	bool valid = Boid.Create( "boid.vert", "boid.tcs", "boid.tes", "boid.frag" );
 	if ( !valid )
 	{
 		fprintf( stderr, "Yuch! The Boid shader did not compile.\n" );
@@ -862,6 +864,12 @@ InitGraphics( )
 	{
 		fprintf( stderr, "Woo-Hoo! The Boid shader compiled.\n" ); 
 	}
+	Boid.Use( );
+	Boid.SetUniformVariable( "uOuter0", 10 );
+	Boid.SetUniformVariable( "uOuter1", 10 );
+	Boid.SetUniformVariable( "uOuter2", 10 );
+	Boid.SetUniformVariable( "uInner0", 10 );
+	Boid.UnUse( );
 
 	// Setup GLSLProgram for simulation compute
 	UpdateBoid.Init( );

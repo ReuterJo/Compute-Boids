@@ -1,0 +1,38 @@
+#version 430 compatibility
+#extension GL_ARB_tessellation_shader: enable
+
+uniform int uOuter0, uOuter1, uOuter2, uInner0;
+
+in vec4 vColor[];
+in float vAngle[];
+
+out vec4 tcsColor[];
+out float tcsAngle[];
+
+layout( vertices = 3 ) out;
+
+void
+main( )
+{
+    // Pass color and angle down pipeline 
+    tcsColor[ gl_InvocationID ] = vColor[ gl_InvocationID ];
+    tcsAngle[ gl_InvocationID ] = vAngle[ gl_InvocationID ];
+
+    // Define triangle size
+    float size = 0.02; 
+
+    // Define an isosceles triangle around the point
+    vec2 offsets[3] = vec2[](
+        vec2( 0.0, 3.0*size ),         
+        vec2( -size, -size ),   
+        vec2( size, -size )
+    );
+
+    gl_out[ gl_InvocationID ].gl_Position = gl_in[0].gl_Position;
+    gl_out[ gl_InvocationID ].gl_Position.xy += offsets[ gl_InvocationID ];
+	
+	gl_TessLevelOuter[0] = float( uOuter0 );
+	gl_TessLevelOuter[1] = float( uOuter1 );
+    gl_TessLevelOuter[2] = float( uOuter2 );
+	gl_TessLevelInner[0] = float( uInner0 );
+}

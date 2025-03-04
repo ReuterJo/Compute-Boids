@@ -11,13 +11,12 @@ layout( std140, binding=5 ) buffer Vel
 };
 
 out vec4	vColor;  // 
+out float	vAngle;  // 
 
 void 
 main( )
 {
 	uint gid = gl_VertexID;
-
-	vec4 vert = gl_Vertex;
 
 	float angle = -atan( Velocities[ gid ].x, Velocities[ gid ].y );
 
@@ -28,5 +27,7 @@ main( )
 		1.0
 	);
 
-    gl_Position = gl_ModelViewProjectionMatrix * vert;
+	vAngle = -angle;
+
+    gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;
 }
