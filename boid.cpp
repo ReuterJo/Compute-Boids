@@ -305,15 +305,15 @@ ReadTexture3D( char *filename, int *width, int *height, int *depth)
 #define WORK_GROUP_SIZE		128
 
 // Simulation constant global variables
-const float xMax = 1.0;
-const float xMin = -1.0;
-const float yMax = 1.0;
-const float yMin = -1.0;
+const float xMax = 			1.0;
+const float xMin = 			-1.0;
+const float yMax = 			1.0;
+const float yMin = 			-1.0;
 
-const float VXMAX =  0.1;
-const float VXMIN =  -0.1;
-const float VYMAX =  0.1;
-const float VYMIN =  -0.1;
+const float vxMax =  		0.1;
+const float vxMin =  		-0.1;
+const float vyMax =  		0.1;
+const float vyMin =  		-0.1;
 
 const float boidSize = 		0.02;
 
@@ -848,8 +848,8 @@ InitGraphics( )
 	for ( int i = 0; i < NUM_BOIDS; i++ )
 	{
 		
-		velocities[i].vx = Ranf( VXMIN, VXMAX );
-		velocities[i].vy = Ranf( VYMIN, VYMAX );; 
+		velocities[i].vx = Ranf( vxMin, vxMax );
+		velocities[i].vy = Ranf( vyMin, vyMax );; 
 		velocities[i].vz = 0.;
 		velocities[i].vw = 1.;
 	}
