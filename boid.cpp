@@ -305,10 +305,10 @@ ReadTexture3D( char *filename, int *width, int *height, int *depth)
 #define WORK_GROUP_SIZE		128
 
 // Simulation constant global variables
-const float XMAX = 1.0;
-const float XMIN = -1.0;
-const float YMAX = 1.0;
-const float YMIN = -1.0;
+const float xMax = 1.0;
+const float xMin = -1.0;
+const float yMax = 1.0;
+const float yMin = -1.0;
 
 const float VXMAX =  0.1;
 const float VXMIN =  -0.1;
@@ -829,8 +829,8 @@ InitGraphics( )
 	for ( int i = 0; i < NUM_BOIDS; i++ )
 	{
 		
-		points[i].x = Ranf( XMIN, XMAX );
-		points[i].y = Ranf( YMIN, YMAX );; 
+		points[i].x = Ranf( xMin, xMax );
+		points[i].y = Ranf( yMin, yMax );; 
 		points[i].z = 0.;
 		points[i].w = 1.;
 	}
@@ -884,6 +884,10 @@ InitGraphics( )
 	}
 	UpdateBoid.Use( );
 	UpdateBoid.SetUniformVariable( "uNumBoids", NUM_BOIDS );
+	UpdateBoid.SetUniformVariable( "uXMax", xMax );
+	UpdateBoid.SetUniformVariable( "uXMin", xMin );
+	UpdateBoid.SetUniformVariable( "uYMax", yMax );
+	UpdateBoid.SetUniformVariable( "uYMin", yMin );
 	UpdateBoid.SetUniformVariable( "uDeltaT", deltaT );
 	UpdateBoid.SetUniformVariable( "uRule1Distance", rule1Distance );
 	UpdateBoid.SetUniformVariable( "uRule2Distance", rule2Distance );

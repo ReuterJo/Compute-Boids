@@ -17,6 +17,10 @@ layout( std140, binding=5 ) buffer Vel
 layout( local_size_x = 128, local_size_y = 1, local_size_z = 1 ) in;
 
 uniform int     uNumBoids;
+uniform float   uXMax;
+uniform float   uXMin;
+uniform float   uYMax;
+uniform float   uYMin;
 uniform float   uDeltaT;
 uniform float   uRule1Distance;
 uniform float   uRule2Distance;
@@ -107,21 +111,21 @@ main( )
     // kinematic update
     vPos = vPos + (vVel *uDeltaT);
     // Wrap around boundary
-    if( vPos.x < -1.0 ) 
+    if( vPos.x < uXMin ) 
     {
-        vPos.x = 1.0;
+        vPos.x = uXMax;
     }
-    if( vPos.x > 1.0 )
+    if( vPos.x > uXMax )
     {
-        vPos.x = -1.0;
+        vPos.x = uXMin;
     }
-    if( vPos.y < -1.0 )
+    if( vPos.y < uYMin )
     {
-        vPos.y = 1.0;
+        vPos.y = uYMax;
     }
-    if( vPos.y > 1.0 )
+    if( vPos.y > uYMax )
     {
-        vPos.y = -1.0;
+        vPos.y = uYMin;
     }
     // Write back
     Positions[ gid ] = vec4( vPos, 0., 1. );
