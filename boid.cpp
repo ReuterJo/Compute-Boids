@@ -507,17 +507,15 @@ Display( )
 	UpdateBoid.DispatchCompute( NUM_BOIDS / WORK_GROUP_SIZE, 1, 1 );
 	UpdateBoid.UnUse( );
 
-	// Draw boid as points
+	// Draw boid as patches
 	Boid.Use( );
 	glPatchParameteri( GL_PATCH_VERTICES, 1 );
 	glBindBuffer( GL_ARRAY_BUFFER, posSSbo );
 	glVertexPointer( 4, GL_FLOAT, 0, (void *)0 );
 	glEnableClientState( GL_VERTEX_ARRAY );
 
-	//glPointSize( 2. );
 	glDrawArrays( GL_PATCHES, 0, NUM_BOIDS);
-
-	//glPointSize( 1. );
+	
 	glDisableClientState( GL_VERTEX_ARRAY );
 	glBindBuffer( GL_ARRAY_BUFFER, 0 );
 	Boid.UnUse( );
@@ -820,7 +818,6 @@ InitGraphics( )
 //#endif
 
 	// Set up position shader storage buffer for simulation
-
 	glGenBuffers( 1, &posSSbo );
 	glBindBuffer( GL_SHADER_STORAGE_BUFFER, posSSbo );
 	glBufferData( GL_SHADER_STORAGE_BUFFER, NUM_BOIDS * sizeof(struct pos), NULL, GL_STATIC_DRAW );
@@ -839,7 +836,6 @@ InitGraphics( )
 	glUnmapBuffer( GL_SHADER_STORAGE_BUFFER );
 
 	// Set up velocity shader storage buffer for simulation
-
 	glGenBuffers( 1, &velSSbo );
 	glBindBuffer( GL_SHADER_STORAGE_BUFFER, velSSbo );
 	glBufferData( GL_SHADER_STORAGE_BUFFER, NUM_BOIDS * sizeof(struct vel), NULL, GL_STATIC_DRAW );

@@ -22,13 +22,14 @@ main( )
     // Define triangle size
     float size = uBoidSize; 
 
-    // Define an isosceles triangle around the point
+    // Define the offsets for an isosceles triangle around the point
     vec2 offsets[3] = vec2[](
         vec2( 0.0, 3.0*size ),         
         vec2( -size, -size ),   
         vec2( size, -size )
     );
 
+    // Apply the offsets
     gl_out[ gl_InvocationID ].gl_Position = gl_in[0].gl_Position;
     gl_out[ gl_InvocationID ].gl_Position.xy += offsets[ gl_InvocationID ];
 	
