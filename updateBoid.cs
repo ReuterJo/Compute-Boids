@@ -21,6 +21,7 @@ uniform float   uXMax;
 uniform float   uXMin;
 uniform float   uYMax;
 uniform float   uYMin;
+uniform float   uVelMax;
 uniform float   uDeltaT;
 uniform float   uRule1Distance;
 uniform float   uRule2Distance;
@@ -107,7 +108,7 @@ main( )
     vVel += (cMass * uRule1Scale) + (colVel * uRule2Scale) + (cVel * uRule3Scale);
 
     // clamp velocity for a more pleasing simulation
-    vVel = normalize(vVel) * clamp(length(vVel), 0.0, 0.1);
+    vVel = normalize(vVel) * clamp(length(vVel), 0.0, uVelMax);
     // kinematic update
     vPos = vPos + (vVel *uDeltaT);
     // Wrap around boundary

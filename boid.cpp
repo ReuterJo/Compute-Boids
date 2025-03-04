@@ -305,17 +305,15 @@ ReadTexture3D( char *filename, int *width, int *height, int *depth)
 #define WORK_GROUP_SIZE		128
 
 // Simulation constant global variables
-const float xMax = 			1.0;
-const float xMin = 			-1.0;
-const float yMax = 			1.0;
-const float yMin = 			-1.0;
+const float xMax = 			2.0;
+const float xMin = 			-2.0;
+const float yMax = 			2.0;
+const float yMin = 			-2.0;
 
-const float vxMax =  		0.1;
-const float vxMin =  		-0.1;
-const float vyMax =  		0.1;
-const float vyMin =  		-0.1;
+const float velMax =  		0.2;
+const float velMin =  		-1.0 * velMax;
 
-const float boidSize = 		0.02;
+const float boidSize = 		0.03;
 
 const float deltaT = 		0.04;
 const float rule1Distance = 0.1;
@@ -844,8 +842,8 @@ InitGraphics( )
 	for ( int i = 0; i < NUM_BOIDS; i++ )
 	{
 		
-		velocities[i].vx = Ranf( vxMin, vxMax );
-		velocities[i].vy = Ranf( vyMin, vyMax );; 
+		velocities[i].vx = Ranf( velMin, velMax );
+		velocities[i].vy = Ranf( velMin, velMax );; 
 		velocities[i].vz = 0.;
 		velocities[i].vw = 1.;
 	}
@@ -887,6 +885,7 @@ InitGraphics( )
 	UpdateBoid.SetUniformVariable( "uXMin", xMin );
 	UpdateBoid.SetUniformVariable( "uYMax", yMax );
 	UpdateBoid.SetUniformVariable( "uYMin", yMin );
+	UpdateBoid.SetUniformVariable( "uVelMax", velMax );
 	UpdateBoid.SetUniformVariable( "uDeltaT", deltaT );
 	UpdateBoid.SetUniformVariable( "uRule1Distance", rule1Distance );
 	UpdateBoid.SetUniformVariable( "uRule2Distance", rule2Distance );
